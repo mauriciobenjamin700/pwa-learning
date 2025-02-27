@@ -1,4 +1,31 @@
-# Aprendendo a Configurar um PWA No React
+# Aprendendo a Configurar um PWA
+
+Um Progressive Web App (PWA) é uma aplicação web que utiliza tecnologias modernas para oferecer uma experiência similar à de um aplicativo nativo. PWAs combinam o melhor da web e dos aplicativos móveis, proporcionando uma experiência rápida, confiável e envolvente para os usuários.
+
+## Características de um PWA
+
+- Responsivo: Funciona em qualquer dispositivo, seja desktop, tablet ou smartphone.
+- Confiável: Carrega instantaneamente, mesmo em condições de rede instáveis, graças ao uso de service workers.
+- Engajador: Oferece uma experiência imersiva, com suporte a notificações push e a capacidade de ser adicionado à tela inicial do dispositivo.
+
+## Tecnologias Utilizadas
+
+- Service Workers: Scripts que rodam em segundo plano e permitem funcionalidades como cache offline, notificações push e sincronização em segundo plano.
+- Manifest: Um arquivo JSON que define como o PWA deve ser exibido ao usuário, incluindo ícones, nome, descrição e tema.
+- HTTPS: PWAs devem ser servidos via HTTPS para garantir a segurança dos dados e a integridade da aplicação.
+
+## Vantagens dos PWAs
+
+- Desempenho: PWAs são rápidos e responsivos, proporcionando uma experiência de usuário fluida.
+- Offline: Graças ao cache offline, os usuários podem acessar o PWA mesmo sem conexão à internet.
+- Instalação: PWAs podem ser instalados diretamente da web, sem a necessidade de passar por uma loja de aplicativos.
+- Atualizações: As atualizações são automáticas e transparentes para o usuário.
+
+## Exemplos de PWAs
+
+- Twitter Lite: Uma versão leve do Twitter que oferece uma experiência rápida e responsiva.
+- Pinterest: A PWA do Pinterest oferece uma experiência de usuário rica e envolvente.
+- Uber: A PWA da Uber permite que os usuários solicitem corridas mesmo em condições de rede instáveis.
 
 ## **Guia Passo a Passo: Configurando um PWA com Vite + React + TypeScript**
 
@@ -59,20 +86,89 @@ Agora, vamos configurar o plugin no arquivo `vite.config.ts`.
 
 1. Abra o arquivo `vite.config.ts` e adicione a configuração do PWA:
 
-   ```typescript
-   import { defineConfig } from 'vite';
-   import react from '@vitejs/plugin-react';
-   import { VitePWA } from 'vite-plugin-pwa';
+    ```typescript
+    import { defineConfig } from 'vite'
+    import react from '@vitejs/plugin-react'
+    import path from 'path';
+    import { VitePWA } from 'vite-plugin-pwa';
 
-   export default defineConfig({
-     plugins: [
-       react(),
-       VitePWA({
-         registerType: 'autoUpdate', // Atualiza o service worker automaticamente
-       }),
-     ],
-   });
-   ```
+    export default defineConfig({
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, 'src'),
+        },
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              // Separa bibliotecas grandes em chunks separados
+              react: ['react', 'react-dom'],
+              vendor: ['lodash', 'axios'],
+            },
+          },
+        },
+        chunkSizeWarningLimit: 1000, // Aumenta o limite de aviso para 1000 KB
+      },
+      plugins: [
+        react(),
+        VitePWA({
+          registerType: 'autoUpdate', // Atualiza o service worker automaticamente
+          includeAssets: ['**/*.{js,css,html,ico,png,svg}'], // Inclui todos os arquivos CSS, JS, ícones, etc.
+          manifest: {
+            name: 'NOME_DO_SEU_PWA',
+            short_name: 'APELIDO DO SEU PWA',
+            description: 'DESCRIÇÃO DO SEU PWA',
+            theme_color: '#ffffff',
+            icons: [
+              {
+                src: 'pwa-192x192.png',
+                sizes: '192x192',
+                type: 'image/png',
+              },
+              {
+                src: 'pwa-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+              },
+            ],
+          },
+          workbox: {
+            maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Aumenta o limite para 5 MB
+
+            globPatterns: ['**/*.{js,css,html,ico,png,svg}'], // Cache de arquivos CSS, JS, ícones, etc.
+            runtimeCaching: [
+              {
+                urlPattern: /\.(css|js)$/, // Cache de CSS e JS
+                handler: 'StaleWhileRevalidate', // Usa a versão em cache, mas busca atualizações
+                options: {
+                  cacheName: 'assets-cache',
+                  expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 60 * 60 * 24 * 30, // 30 dias
+                  },
+                },
+              },
+              {
+                urlPattern: /^https:\/\/api\.seusite\.com\/.*/, // Cache de APIs externas (opcional)
+                handler: 'NetworkFirst', // Prioriza a rede, mas usa o cache se offline
+                options: {
+                  cacheName: 'api-cache',
+                  expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24, // 1 dia
+                  },
+                },
+              },
+            ],
+          },
+          devOptions: {
+            enabled: false, // Desabilita o PWA no modo de desenvolvimento
+          },
+        }),
+      ],
+    });
+    ```
 
 2. Salve o arquivo.
 
@@ -86,48 +182,10 @@ Para que o PWA funcione corretamente, você precisa adicionar ícones e um arqui
 2. Adicione os ícones na pasta `public`:
    - `pwa-192x192.png` (192x192 pixels)
    - `pwa-512x512.png` (512x512 pixels)
+   - `apple-touch-icon.png`
+   - `favicon.ico`
 
    Você pode gerar esses ícones usando ferramentas como [favicon.inbrowser.app](https://favicon.inbrowser.app/tools/favicon-generator).
-
-3. Crie um arquivo `manifest.json` na pasta `public` com o seguinte conteúdo:
-
-```json
-{
-  "name": "My First App",
-  "short_name": "My App",
-  "icons": [
-    {
-      "src": "/pwa-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/pwa-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/pwa-maskable-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
-  "description": "My App, Venha Conhecer!"
-}
-```
 
 ---
 
@@ -138,10 +196,11 @@ Agora, vamos configurar o arquivo `index.html` para carregar o `manifest.json` e
 1. Abra o arquivo `index.html` na raiz do projeto e adicione o seguinte código dentro da tag `<head>`:
 
    ```html
-   <link rel="manifest" href="/manifest.json" />
-   <meta name="theme-color" content="#ffffff" />
-   <link rel="icon" href="/favicon.ico" />
-   <link rel="apple-touch-icon" href="/icon-192x192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="description" content="Meu PWA incrível" />
    ```
 
    Seu `index.html` deve ficar assim:
@@ -150,14 +209,14 @@ Agora, vamos configurar o arquivo `index.html` para carregar o `manifest.json` e
    <!DOCTYPE html>
    <html lang="pt-BR">
      <head>
-       <meta charset="UTF-8" />
-       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-       <meta name="description" content="Meu PWA incrível" />
-       <link rel="manifest" href="/manifest.json" />
-       <meta name="theme-color" content="#ffffff" />
-       <link rel="icon" href="/favicon.ico" />
-       <link rel="apple-touch-icon" href="/icon-192x192.png" />
-       <title>Meu PWA</title>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content="#ffffff" />
+      <link rel="icon" href="/favicon.ico" />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      <meta name="description" content="Meu PWA incrível" />
+      <title>Meu PWA</title>
      </head>
      <body>
        <div id="root"></div>
@@ -172,10 +231,11 @@ Agora, vamos configurar o arquivo `index.html` para carregar o `manifest.json` e
 
 Agora que tudo está configurado, vamos testar o PWA.
 
-1. Execute o projeto em modo de desenvolvimento:
+1. Execute o projeto em modo de pre-visualização:
 
    ```bash
-   npm run dev
+   npm run build
+   npm run preview
    ```
 
 2. Abra o navegador e acesse `http://localhost:5173`.
@@ -185,27 +245,7 @@ Agora que tudo está configurado, vamos testar o PWA.
 
 ---
 
-### **Passo 7: Build e Preview**
-
-Para testar o PWA em um ambiente de produção:
-
-1. Gere o build de produção:
-
-   ```bash
-   npm run build
-   ```
-
-2. Execute o servidor de preview:
-
-   ```bash
-   npm run preview
-   ```
-
-3. Acesse `http://localhost:4173` e verifique se o PWA está funcionando corretamente.
-
----
-
-### **Passo 8: Adicionar um Botão de Instalação (Opcional)**
+### **Passo 7: Adicionar um Botão de Instalação (Opcional)**
 
 Para permitir que os usuários instalem o PWA, você pode adicionar um botão de instalação. Crie um componente `InstallButton.tsx`:
 
@@ -259,3 +299,4 @@ Quando estiver pronto, publique seu PWA em um servidor que suporte HTTPS (obriga
 ## Referencias
 
 - [vite pwa](https://vite-pwa-org.netlify.app/guide/)
+- [web.dev](https://web.dev/learn/pwa/welcome?hl=pt-br)
