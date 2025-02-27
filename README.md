@@ -296,7 +296,13 @@ Quando estiver pronto, publique seu PWA em um servidor que suporte HTTPS (obriga
 
 ---
 
+## Novos Projetos
+
+- [Offline Mode](./modules/offline-mode/)
+- [Push Notifications](./modules/push-notification/)
+
 ## Referencias
 
 - [vite pwa](https://vite-pwa-org.netlify.app/guide/)
 - [web.dev](https://web.dev/learn/pwa/welcome?hl=pt-br)
+- [Mozilla push notification](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/js13kGames/Re-engageable_Notifications_Push)
