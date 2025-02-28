@@ -433,3 +433,7 @@ self.addEventListener('push', (event) => {
    ```
 
 4. Verifique se a notificação é exibida no frontend, mesmo que o aplicativo não esteja aberto.
+
+## Referências
+
+- [pywebpush](https://pypi.org/project/pywebpush/)
