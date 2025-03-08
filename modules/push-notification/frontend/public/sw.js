@@ -120,6 +120,7 @@ setInterval(cleanOldCache, 60 * 60 * 1000); // Executa a cada hora
 
 // Notificações Push
 self.addEventListener('push', (event) => {
+  console.log("Notificação recebida via WebPush: ", event.data)
   const data = event.data?.json(); // Recebe os dados da notificação
   const title = data?.title || 'Nova notificação';
   const options = {
@@ -137,7 +138,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close(); // Fecha a notificação
   event.waitUntil(
-    clients.openWindow('https://seusite.com') // Abre uma URL ao clicar na notificação
+    clients.openWindow('https://github.com/mauriciobenjamin700') // Abre uma URL ao clicar na notificação
   );
 });
 

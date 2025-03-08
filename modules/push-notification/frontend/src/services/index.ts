@@ -39,29 +39,29 @@ export async function registerServiceWorker(){
   }
 }
 
-export async function sendNotification(title: string, body: string) {
+// export async function sendNotification(title: string, body: string) {
 
-  let registration = undefined
+//   let registration = undefined
 
-  alert("entrei na linha 19")
+//   alert("entrei na linha 19")
 
-  registration = await navigator.serviceWorker.ready
+//   registration = await navigator.serviceWorker.ready
 
-  alert("entrei na linha 26: " + registration.active)
+//   alert("entrei na linha 26: " + registration.active)
   
-  registration?.active?.postMessage({
-    type: 'push',
-    data: {
-      title: title,
-      body: body,
-    }
-  });
+//   registration?.active?.postMessage({
+//     type: 'push',
+//     data: {
+//       title: title,
+//       body: body,
+//     }
+//   });
 
-  alert("entrei na linha 36")
+//   alert("entrei na linha 36")
 
-}
+// }
 
-export async function sendLocalNotification(title: string, body: string) {
+export async function sendNotification(title: string, body: string) {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({
       type: 'SHOW_NOTIFICATION',
@@ -71,4 +71,21 @@ export async function sendLocalNotification(title: string, body: string) {
   } else {
     console.warn('Service Worker não está pronto ou não suportado.');
   }
+}
+
+export async function subscribeUser() {
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: 'YOUR_PUBLIC_VAPID_KEY'
+  });
+
+  // Enviar a assinatura para o servidor
+  await fetch('/subscribe', {
+    method: 'POST',
+    body: JSON.stringify(subscription),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 }

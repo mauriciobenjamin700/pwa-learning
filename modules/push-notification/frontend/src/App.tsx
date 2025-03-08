@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { getNotificationPermission, registerServiceWorker, sendLocalNotification } from './services'
+import { getNotificationPermission, registerServiceWorker, sendNotification, subscribeUser } from './services'
 
 function App() {
   const [notifyState, setNotifyState] = useState("")
@@ -10,13 +10,19 @@ function App() {
       await registerServiceWorker()
       const permission = await getNotificationPermission()
       setNotifyState(permission)
+      if (permission === "denied") {
+        alert("Notificações bloqueadas pelo usuário")
+      } else if (permission === "granted") {
+        await subscribeUser();
+      }
+
     }
     main()
   },[])
 
   const handleNotify = async () => {
     alert("Notificação enviada!")
-    await sendLocalNotification("Título da Notificação", "Corpo da Notificação")
+    await sendNotification("Título da Notificação", "Corpo da Notificação")
   }
 
   return (
