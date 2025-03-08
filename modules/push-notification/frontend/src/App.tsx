@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { getNotificationPermission, sendNotification } from './services'
+import { getNotificationPermission, registerServiceWorker, sendLocalNotification } from './services'
 
 function App() {
   const [notifyState, setNotifyState] = useState("")
 
   useEffect(() => {
     const main = async () => {
+      await registerServiceWorker()
       const permission = await getNotificationPermission()
       setNotifyState(permission)
     }
@@ -15,7 +16,7 @@ function App() {
 
   const handleNotify = async () => {
     alert("Notificação enviada!")
-    await sendNotification("Título da Notificação", "Corpo da Notificação")
+    await sendLocalNotification("Título da Notificação", "Corpo da Notificação")
   }
 
   return (

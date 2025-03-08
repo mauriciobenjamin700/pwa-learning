@@ -8,11 +8,35 @@
 export async function getNotificationPermission(): Promise<NotificationPermission> {
   let permissions :NotificationPermission = 'denied';
 
-    if ('Notification' in window) {
-        permissions = await Notification.requestPermission()
-    }
+  if (!('Notification' in window)) {
+    console.warn('Este navegador não suporta notificações.');
+    permissions = "denied";
+  }
+
+  else if ('Notification' in window && Notification.permission === 'default') {
+      permissions = await Notification.requestPermission()
+  }
+
+  else {
+    permissions = Notification.permission
+  }
 
     return permissions;
+}
+
+export async function registerServiceWorker(){
+
+  try{
+    if ('serviceWorker' in navigator) {
+      const service = await navigator.serviceWorker.register('/sw.js')
+      console.log('Service Worker registrado com sucesso:', service.scope);
+    }
+    else{
+      throw new Error('Service Worker não suportado');
+    }
+  } catch (error) {
+    console.error('Falha ao registrar o Service Worker:', error);
+  }
 }
 
 export async function sendNotification(title: string, body: string) {
@@ -35,4 +59,16 @@ export async function sendNotification(title: string, body: string) {
 
   alert("entrei na linha 36")
 
+}
+
+export async function sendLocalNotification(title: string, body: string) {
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'SHOW_NOTIFICATION',
+      title,
+      body,
+    });
+  } else {
+    console.warn('Service Worker não está pronto ou não suportado.');
+  }
 }
