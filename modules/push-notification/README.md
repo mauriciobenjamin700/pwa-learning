@@ -9,96 +9,62 @@ Vamos usar **Push API** e **Service Worker** para implementar isso. Aqui está o
 
 ---
 
-## **Passo 1: Configurar o Service Worker para Notificações**
+Antes de iniciarmos, vamos precisar ter um projeto para o backend que ira enviar as notificações quanto um frontend para visualizar as notificações
 
-O service worker é responsável por receber e exibir notificações push. No seu `vite.config.ts`, certifique-se de que o service worker está configurado corretamente:
+- Crie seu frontend usando `npm create vite@latest frontend -- --template react-ts`
+- Instale o axios, usando `cd frontend && npm i && npm install axios && cd ..`
+- Crie seu backend usando `mkdir backend`
 
-```typescript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
+## **Passo 1: Configurar o Service Worker para Notificações no Frontend**
 
-export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      manifest: {
-        name: 'Meu PWA',
-        short_name: 'PWA',
-        description: 'Um exemplo de PWA com React e Vite',
-        theme_color: '#ffffff',
-        icons: [
-          {
-            src: 'icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      },
-      workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Aumenta o limite para 5 MB
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'], // Cache de arquivos CSS, JS, ícones, etc.
-        runtimeCaching: [
-          {
-            urlPattern: /\.(css|js)$/, // Cache de CSS e JS
-            handler: 'StaleWhileRevalidate', // Usa a versão em cache, mas busca atualizações
-            options: {
-              cacheName: 'assets-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 dias
-              },
-            },
-          },
-        ],
-      },
-    }),
-  ],
-});
-```
+O service worker é responsável por receber e exibir notificações push. No seu `vite.config.ts`, certifique-se de que o service worker está configurado corretamente seguindo [este guia](../../README.md) como base.
 
 ---
 
 ## **Passo 2: Solicitar Permissão para Notificações**
 
-No frontend, você precisa solicitar permissão do usuário para enviar notificações. Crie um componente ou função para isso:
+No frontend, você precisa solicitar permissão do usuário para enviar notificações. Crie uma função para isso:
+
+```ts
+// /src/servicer/notify/index.ts
+export async function getNotificationPermission(): Promise<NotificationPermission> {
+  let permissions :NotificationPermission = 'denied';
+
+    if ('Notification' in window) {
+        permissions = await Notification.requestPermission()
+    }
+
+    return permissions;
+}
+```
+
+Adicione esta função em seu App, como o seguinte exemplo:
 
 ```tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
+import './App.css'
+import { getNotificationPermission } from './services'
 
-function NotificationPermission() {
-  const [permission, setPermission] = useState<NotificationPermission>('default');
+function App() {
+  const [notifyState, setNotifyState] = useState("")
 
   useEffect(() => {
-    if ('Notification' in window) {
-      // Verifica se o navegador suporta notificações
-      Notification.requestPermission().then((permission) => {
-        setPermission(permission);
-      });
+    const main = async () => {
+      const permission = await getNotificationPermission()
+      setNotifyState(permission)
     }
-  }, []);
+    main()
+  },[])
 
   return (
     <div>
-      {permission === 'granted' ? (
-        <p>Notificações permitidas!</p>
-      ) : (
-        <p>Por favor, permita notificações para receber atualizações.</p>
-      )}
+      <h1>As notificações estão: {notifyState}</h1>
     </div>
-  );
+  )
 }
 
-export default NotificationPermission;
+export default App
 ```
-
-Adicione este componente em sua aplicação para solicitar permissão ao usuário.
 
 ---
 
@@ -107,14 +73,14 @@ Adicione este componente em sua aplicação para solicitar permissão ao usuári
 No seu service worker (gerado pelo `vite-plugin-pwa`), adicione o código para lidar com notificações push. Crie um arquivo `sw.js` na pasta `public`:
 
 ```javascript
-// public/sw.js
+// /public/sw.js
 self.addEventListener('push', (event) => {
   const data = event.data?.json(); // Recebe os dados da notificação
   const title = data?.title || 'Nova notificação';
   const options = {
     body: data?.body || 'Você tem uma nova notificação!',
-    icon: '/icon-192x192.png', // Ícone da notificação
-    badge: '/icon-192x192.png', // Badge para dispositivos móveis
+    icon: '/pwa-192x192.png', // Ícone da notificação
+    badge: '/pwa-192x192.png', // Badge para dispositivos móveis
   };
 
   event.waitUntil(
@@ -123,20 +89,7 @@ self.addEventListener('push', (event) => {
 });
 ```
 
-No `vite.config.ts`, certifique-se de que o service worker está configurado para usar este arquivo:
-
-```typescript
-VitePWA({
-  registerType: 'autoUpdate',
-  manifest: {
-    // Configurações do manifest
-  },
-  workbox: {
-    // Configurações do Workbox
-  },
-  includeAssets: ['sw.js'], // Inclui o arquivo do service worker
-}),
-```
+Para testar, vamos criar uma nova notificação manualmente
 
 ---
 

@@ -119,7 +119,10 @@ Agora, vamos configurar o plugin no arquivo `vite.config.ts`.
             name: 'NOME_DO_SEU_PWA',
             short_name: 'APELIDO DO SEU PWA',
             description: 'DESCRIÇÃO DO SEU PWA',
+            display: 'standalone',
+            background_color: '#ffffff',
             theme_color: '#ffffff',
+            start_url: '/',
             icons: [
               {
                 src: 'pwa-192x192.png',
@@ -161,6 +164,9 @@ Agora, vamos configurar o plugin no arquivo `vite.config.ts`.
                 },
               },
             ],
+            cacheId: 1.0.0, // ID do cache
+            clientsClaim: true, // Força o service worker a assumir o controle imediatamente
+            skipWaiting: true, // Ignora a espera e ativa o novo service worker imediatamente
           },
           devOptions: {
             enabled: false, // Desabilita o PWA no modo de desenvolvimento
