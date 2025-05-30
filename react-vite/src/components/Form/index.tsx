@@ -1,18 +1,26 @@
 import { JSX } from "react";
 
+import styles from "./styles.module.css";
+
 interface FormProps {
   inputs: JSX.Element[];
+  buttons: JSX.Element[];
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }
 
 export default function Form({
-  inputs = [],
+  inputs,
+  buttons,
+  onSubmit
 }: FormProps ): JSX.Element {
   return (
-    <form action="">
-        <div className="form-group">
+    <form className={styles.container} onSubmit={onSubmit}>
+        <div className={styles.inputContainer}>
           {inputs}
         </div>
-        <button type="submit" className="btn btn-primary">Submit</button>
+        <div className={styles.buttonContainer}>
+          {buttons}
+        </div>
     </form>
   )
 }

@@ -1,0 +1,14 @@
+.container{
+    width: 120px;
+    height: 60px;
+    border-radius: 16px;
+    background-color: #f1f1f1;
+    color: #000;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.container:hover{
+    background-color: #e0e0e0;
+    border-color: #010101;
+}

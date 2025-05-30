@@ -1,5 +1,8 @@
-import { FormButtonType } from "@/utils/enums";
 import {JSX} from "react";
+
+import { FormButtonType } from "@/utils/enums";
+
+import styles from "./styles.module.css";
 
 interface FormButtonProps {
     id: string;
@@ -17,10 +20,10 @@ export default function FormButton({
 ): JSX.Element {
     return (
         <button
+            className={`${styles.container} btn btn-primary`}
             id={id}
             type={type}
             onClick={onClick}
-            className="btn btn-primary"
         >
             {text}
         </button>
