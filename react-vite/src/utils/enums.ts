@@ -1,0 +1,30 @@
+export const enum FormInputType {
+    TEXT = "text",
+    PASSWORD = "password",
+    EMAIL = "email",
+    NUMBER = "number",
+    SEARCH = "search",
+    TEL = "tel",
+    URL = "url",
+    DATE = "date",
+    DATETIME_LOCAL = "datetime-local",
+    MONTH = "month",
+    WEEK = "week",
+    TIME = "time",
+    COLOR = "color",
+    CHECKBOX = "checkbox",
+    RADIO = "radio",
+    FILE = "file",
+    RANGE = "range",
+    HIDDEN = "hidden",
+    IMAGE = "image",
+    RESET = "reset",
+    SUBMIT = "submit",
+    BUTTON = "button",
+}
+
+export const enum FormButtonType {
+    BUTTON = "button",
+    SUBMIT = "submit",
+    RESET = "reset",
+}
