@@ -8,3 +8,11 @@
     width: 40vw;
     height: 60vh;
 }
+
+@media screen and (max-width: 600px) {
+    .container {
+        width: 80vw;
+        height: 80vh;
+    }
+    
+}

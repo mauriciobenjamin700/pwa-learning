@@ -17,10 +17,35 @@ export default defineConfig({
     open: true, // Abre o navegador automaticamente quando o servidor é iniciado
     allowedHosts: true, // Permite que o Vite sirva o aplicativo em qualquer host
   },
+  preview: {
+    port: 3000,
+    host: true,
+    strictPort: true,
+  },
   plugins: [
     react(),
-    VitePWA({
-      registerType: 'autoUpdate', // Atualiza o service worker automaticamente
-    }),
+VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Meu App',
+        short_name: 'MeuApp',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#ffffff',
+        theme_color: '#053fb4',
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
+    })
   ],
 });
