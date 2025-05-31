@@ -46,3 +46,14 @@ export async function subscribeUserToPush() {
   alert('Inscrito para notificações!');
   console.log('Inscrição enviada ao servidor:', response);
 }
+
+
+export async function listenNotifies() {
+  if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'PUSH_MESSAGE') {
+      alert(event.data.message);
+    }
+  });
+}
+}

@@ -4,10 +4,10 @@ import './index.css'
 import App from './App.tsx'
 import { Provider } from 'react-redux';
 import { store } from './store';
-import registerSW from "@/workers";
+import registerSW, { listenNotifies } from "@/workers";
 
 registerSW();
-
+listenNotifies();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>

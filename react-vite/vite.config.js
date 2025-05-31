@@ -25,6 +25,13 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
+            srcDir: "src",
+            filename: 'sw.js', // Nome do arquivo do Service Worker
+            strategies: 'injectManifest', // Estratégia de injeção do Service Worker
+            injectManifest: {
+                swSrc: 'src/sw.js', // Caminho para o arquivo do Service Worker
+                swDest: 'sw.js', // Nome do arquivo de saída do Service Worker
+            },
             manifest: {
                 name: 'Meu App PWA', // NOME DO APLICATIVO
                 description: 'Um aplicativo incrível feito com React e Vite',
