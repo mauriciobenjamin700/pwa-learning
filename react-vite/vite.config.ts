@@ -10,6 +10,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  server: {
+    port: 3000,
+    host: true, // Permite que o Vite sirva o aplicativo em qualquer endereço IP
+    strictPort: true, // Garante que o Vite use a porta especificada (3000) e não tente outra porta se essa estiver ocupada
+    open: true, // Abre o navegador automaticamente quando o servidor é iniciado
+    allowedHosts: true, // Permite que o Vite sirva o aplicativo em qualquer host
+  },
   plugins: [
     react(),
     VitePWA({

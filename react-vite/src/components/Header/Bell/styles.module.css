@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button {
+  padding: 0.5rem;
+  border-radius: 9999px;
+  background-color: #e5e7eb;
+  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.button:hover {
+  background-color: #d1d5db; 
+}
+
+.button:focus {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
