@@ -33,13 +33,14 @@ export default function Bell({
     return (
         <div className={styles.container}>
             <button
-                onClick={onClick}
                 className={styles.button}
+                onClick={onClick}
+                
             >
                 <img
+                    className={styles.icon}
                     src={icon}
                     alt="Bell Icon"
-                    className={styles.icon}
                 />
             </button>
         </div>

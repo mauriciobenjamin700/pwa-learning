@@ -26,8 +26,10 @@ export default defineConfig({
         VitePWA({
             registerType: 'autoUpdate',
             manifest: {
-                name: 'Meu App',
-                short_name: 'MeuApp',
+                name: 'Meu App PWA', // NOME DO APLICATIVO
+                description: 'Um aplicativo incrível feito com React e Vite',
+                lang: 'pt-BR', // LINGUAGEM DO APLICATIVO
+                short_name: 'Meu App', // NOME QUE APARECE NO MENU DO CELULAR
                 start_url: '/',
                 display: 'standalone',
                 background_color: '#ffffff',
