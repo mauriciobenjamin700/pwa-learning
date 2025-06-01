@@ -1,9 +1,9 @@
+// filepath: /home/mauriciobenjamin700/projects/my/learning/pwa-learning/react-vite/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// https://vite.dev/config/
 export default defineConfig({
   resolve: {
     alias: {
@@ -12,10 +12,10 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: true, // Permite que o Vite sirva o aplicativo em qualquer endereço IP
-    strictPort: true, // Garante que o Vite use a porta especificada (3000) e não tente outra porta se essa estiver ocupada
-    open: true, // Abre o navegador automaticamente quando o servidor é iniciado
-    allowedHosts: true, // Permite que o Vite sirva o aplicativo em qualquer host
+    host: true,
+    strictPort: true,
+    open: true,
+    allowedHosts: true,
   },
   preview: {
     port: 3000,
@@ -24,20 +24,14 @@ export default defineConfig({
   },
   plugins: [
     react(),
-VitePWA({
+    VitePWA({
       registerType: 'autoUpdate',
-      srcDir: "src",
-      filename: 'sw.js', // Nome do arquivo do Service Worker
-      strategies: 'injectManifest', // Estratégia de injeção do Service Worker
-      injectManifest: {
-        swSrc: 'src/sw.js', // Caminho para o arquivo do Service Worker
-        swDest: 'sw.js', // Nome do arquivo de saída do Service Worker
-      },
+      strategies: 'generateSW', // Alterado para usar generateSW
       manifest: {
-        name: 'Meu App PWA', // NOME DO APLICATIVO
+        name: 'Meu App PWA',
         description: 'Um aplicativo incrível feito com React e Vite',
-        lang: 'pt-BR', // LINGUAGEM DO APLICATIVO
-        short_name: 'Meu App', // NOME QUE APARECE NO MENU DO CELULAR
+        lang: 'pt-BR',
+        short_name: 'Meu App',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
