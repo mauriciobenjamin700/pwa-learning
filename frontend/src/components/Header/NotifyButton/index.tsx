@@ -1,9 +1,9 @@
 // Pode ser em qualquer componente React
-import registerServiceWorker from "@/workers";
+import {requestNotifyPermission} from "@/workers";
 
 export default function NotifyButton() {
   return (
-    <button onClick={registerServiceWorker}>
+    <button onClick={requestNotifyPermission}>
       Ativar notificações
     </button>
   );

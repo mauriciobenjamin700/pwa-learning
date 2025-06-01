@@ -1,0 +1,95 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API de Notificações Push",
+    "version": "1.0.0",
+    "description": "Documentação da API para o backend de notificações push."
+  },
+  "host": "localhost:3001",
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Status do servidor",
+        "description": "Retorna uma mensagem simples indicando que o servidor está rodando.",
+        "responses": {
+          "200": {
+            "description": "Servidor de Notificações Push"
+          }
+        }
+      }
+    },
+    "/api/subscriptions": {
+      "get": {
+        "summary": "Obter todas as inscrições",
+        "responses": {
+          "200": {
+            "description": "Lista de inscrições",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "endpoint": { "type": "string" },
+                  "keys": { "type": "object" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover todas as inscrições",
+        "responses": {
+          "200": {
+            "description": "Todas as inscrições foram removidas"
+          },
+          "500": {
+            "description": "Erro ao limpar inscrições"
+          }
+        }
+      }
+    },
+    "/api/subscribe": {
+      "post": {
+        "summary": "Adicionar uma nova inscrição",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "endpoint": { "type": "string" },
+                "keys": { "type": "object" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Inscrito com sucesso!"
+          },
+          "500": {
+            "description": "Erro ao salvar inscrição"
+          }
+        }
+      }
+    },
+    "/api/notify": {
+      "post": {
+        "summary": "Enviar notificações para todos os inscritos",
+        "responses": {
+          "200": {
+            "description": "Notificações enviadas com sucesso"
+          },
+          "500": {
+            "description": "Erro ao buscar inscrições"
+          }
+        }
+      }
+    }
+  }
+}

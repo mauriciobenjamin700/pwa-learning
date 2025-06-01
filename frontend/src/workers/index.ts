@@ -1,6 +1,6 @@
 import { registerSW } from 'virtual:pwa-register';
 
-const VAPID_PUBLIC_KEY = "BAYnAICy5lO23CfhY-rhD7C_gdfIq4W9tkCbzfiaO-iIiJmNQfQfL77KuoH5vaD5VBA3SyiXIcb0g-icgB90IzQ"
+ const VAPID_PUBLIC_KEY = "BAYnAICy5lO23CfhY-rhD7C_gdfIq4W9tkCbzfiaO-iIiJmNQfQfL77KuoH5vaD5VBA3SyiXIcb0g-icgB90IzQ"
 
 
 const updateSW = registerSW({
@@ -15,8 +15,10 @@ const updateSW = registerSW({
 
 export default function registerServiceWorker() {
   updateSW();
+}
 
-  // Solicitar permissão de notificação
+
+export const requestNotifyPermission = () => {
   if ('Notification' in window && 'serviceWorker' in navigator) {
     Notification.requestPermission().then((permission) => {
       if (permission === 'granted') {

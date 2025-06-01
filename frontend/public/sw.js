@@ -1,5 +1,7 @@
 const VAPID_PUBLIC_KEY = "BAYnAICy5lO23CfhY-rhD7C_gdfIq4W9tkCbzfiaO-iIiJmNQfQfL77KuoH5vaD5VBA3SyiXIcb0g-icgB90IzQ"
 
+console.log('Chave VAPID Pública:', VAPID_PUBLIC_KEY);
+
 const urlBase64ToUint8Array = (base64String) => {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
@@ -37,8 +39,15 @@ self.addEventListener('activate', async (event) => {
 });
 
 self.addEventListener('push', (event) => {
-    const data = event.data?.text() || 'Nova mensagem!';
-    self.registration.showNotification('Notificação', { body: data });
+  console.log("Entrei no push")
+  const title = event.data?.text() || 'Notificação';
+  console.log('Título da notificação:', title);
+  const data = event.data?.json(); // Parse o payload como JSON
+  console.log('Push recebido:', data);
+  self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: data.icon || '/icon.png', // Opcional: ícone padrão
+  });
 });
 
 self.addEventListener('notificationclick', (event) => {
