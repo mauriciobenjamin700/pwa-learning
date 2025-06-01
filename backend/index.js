@@ -15,7 +15,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 const subscriptions = []; // Em produção, use um banco de dados!
 
 webpush.setVapidDetails(
-  'mailto:seu@email.com',
+  'mailto:'+process.env.VAPID_EMAIL,
   process.env.VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 );
@@ -75,38 +75,71 @@ app.post('/api/subscribe', (req, res) => {
   );
 });
 
-// Envia notificações para todos os inscritos
 app.post('/api/notify', async (req, res) => {
   const payload = JSON.stringify({
-    title: 'Olá do backend!',
-    body: 'Essa é uma notificação enviada pelo backend.',
-    icon: '/pwa-192x192.png' // Adicione um ícone
-  });
-
-  db.all(`SELECT endpoint, keys FROM subscriptions`, async (err, rows) => {
-    if (err) {
-      console.error('Erro ao buscar inscrições:', err.message);
-      res.status(500).json({ error: 'Erro ao buscar inscrições' });
-      return;
+    notification: {
+      title:'Notificação DESGRAÇA',
+      body: 'Essa é uma notificação enviada pelo backend.',
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
+      vibrate: [100, 50, 100],
+      data: {
+        dateOfArrival: Date.now(),
+        primaryKey: 1
+      },
+      actions: [
+        {
+          action: 'explore',
+          title: 'Ver mais'
+        }
+      ]
     }
-
-    const results = [];
-    for (const row of rows) {
-      const subscription = {
-        endpoint: row.endpoint,
-        keys: JSON.parse(row.keys)
-      };
-
-      try {
-        await webpush.sendNotification(subscription, payload);
-        results.push({ success: true });
-      } catch (err) {
-        results.push({ success: false, error: err.message });
+  });
+  try {
+    db.all(`SELECT endpoint, keys FROM subscriptions`, async (err, rows) => {
+      if (err) {
+        console.error('Erro ao buscar inscrições:', err);
+        return res.status(500).json({ error: 'Erro ao buscar inscrições' });
       }
-    }
 
-    res.json({ results });
-  });
+      const results = [];
+      for (const row of rows) {
+        const subscription = {
+          endpoint: row.endpoint,
+          keys: JSON.parse(row.keys)
+        };
+
+        try {
+          const result = await webpush.sendNotification(subscription, payload);
+          console.log('Notificação enviada com sucesso:', result);
+          results.push({ success: true, endpoint: subscription.endpoint });
+        } catch (error) {
+          console.error('Erro ao enviar notificação:', {
+            error: error.message,
+            statusCode: error.statusCode,
+            endpoint: subscription.endpoint
+          });
+          
+          if (error.statusCode === 410 || error.statusCode === 404) {
+            await db.run('DELETE FROM subscriptions WHERE endpoint = ?', [subscription.endpoint]);
+            console.log('Inscrição inválida removida:', subscription.endpoint);
+          }
+          
+          results.push({ 
+            success: false, 
+            error: error.message,
+            statusCode: error.statusCode,
+            endpoint: subscription.endpoint 
+          });
+        }
+      }
+
+      res.json({ results });
+    });
+  } catch (error) {
+    console.error('Erro geral:', error);
+    res.status(500).json({ error: 'Erro interno no servidor' });
+  }
 });
 
 app.listen(3001, () => console.log('Backend rodando na porta 3001'));

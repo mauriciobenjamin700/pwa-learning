@@ -1,3 +1,6 @@
+// This line is required for workbox manifest injection
+self.__WB_MANIFEST;
+
 const VAPID_PUBLIC_KEY = "BAYnAICy5lO23CfhY-rhD7C_gdfIq4W9tkCbzfiaO-iIiJmNQfQfL77KuoH5vaD5VBA3SyiXIcb0g-icgB90IzQ"
 
 console.log('Chave VAPID Pública:', VAPID_PUBLIC_KEY);
@@ -28,26 +31,78 @@ const saveSubscription = async (subscription) => {
     return response.json();
 };
 
-self.addEventListener('activate', async (event) => {
-    const subscription = await self.registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
+console.log('Service Worker iniciado');
 
-    const response = await saveSubscription(subscription);
-    console.log(response);
+self.addEventListener('install', (event) => {
+    console.log('Service Worker instalado');
+    event.waitUntil(self.skipWaiting());
 });
 
-self.addEventListener('push', (event) => {
-  console.log("Entrei no push")
-  const title = event.data?.text() || 'Notificação';
-  console.log('Título da notificação:', title);
-  const data = event.data?.json(); // Parse o payload como JSON
-  console.log('Push recebido:', data);
-  self.registration.showNotification(data.title, {
-    body: data.body,
-    icon: data.icon || '/icon.png', // Opcional: ícone padrão
-  });
+self.addEventListener('activate', async (event) => {
+    event.waitUntil(
+        (async () => {
+            try {
+                const subscription = await self.registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+                });
+                
+                console.log('Nova subscription criada:', subscription);
+                
+                const response = await saveSubscription(subscription);
+                console.log('Subscription salva no backend:', response);
+                
+                // Ativa o service worker imediatamente em todas as abas
+                await self.clients.claim();
+                
+            } catch (error) {
+                console.error('Erro ao ativar service worker:', error);
+            }
+        })()
+    );
+});
+
+self.addEventListener('push', function(event) {
+    event.waitUntil(
+        (async () => {
+            try {
+                console.log('Raw push data:', event.data?.text());
+                
+                if (!event.data) {
+                    console.warn('Recebido push sem dados');
+                    return;
+                }
+
+                const data = event.data.json();
+                console.log('Dados do push parseados:', data);
+
+                const options = {
+                    body: data.body || 'Sem mensagem',
+                    icon: data.icon || '/icon-192x192.png',
+                    badge: data.badge || '/icon-192x192.png',
+                    vibrate: data.vibrate || [100, 50, 100],
+                    data: {
+                        ...data.data,
+                        timestamp: Date.now()
+                    },
+                    actions: data.actions || [{
+                        action: 'close',
+                        title: 'Fechar'
+                    }]
+                };
+
+                console.log('Mostrando notificação com opções:', options);
+                return self.registration.showNotification(data.title || 'Notificação', options);
+                
+            } catch (error) {
+                console.error('Erro ao processar push:', error);
+                // Mostra uma notificação de fallback em caso de erro
+                return self.registration.showNotification('Notificação', {
+                    body: 'Recebemos uma atualização mas houve um erro ao processá-la.'
+                });
+            }
+        })()
+    );
 });
 
 self.addEventListener('notificationclick', (event) => {

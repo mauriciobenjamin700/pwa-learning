@@ -25,8 +25,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'generateSW', // Alterado para usar generateSW | injectManifest
+      // srcDir: 'public',
+      // filename: 'sw.js',
       registerType: 'autoUpdate',
-      strategies: 'generateSW', // Alterado para usar generateSW
       manifest: {
         name: 'Meu App PWA',
         description: 'Um aplicativo incrível feito com React e Vite',
@@ -48,6 +50,9 @@ export default defineConfig({
             type: 'image/png'
           }
         ]
+      },
+      injectManifest: {
+        injectionPoint: 'self.__WB_MANIFEST'
       }
     })
   ],
