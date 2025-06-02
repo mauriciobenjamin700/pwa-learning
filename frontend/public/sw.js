@@ -1,56 +1,34 @@
-const VAPID_PUBLIC_KEY = "BAYnAICy5lO23CfhY-rhD7C_gdfIq4W9tkCbzfiaO-iIiJmNQfQfL77KuoH5vaD5VBA3SyiXIcb0g-icgB90IzQ"
-const ENDPOINT_TO_SUBSCRIBE = 'http://localhost:3001/api/subscribe';
-
-console.log('Chave VAPID Pública:', VAPID_PUBLIC_KEY);
-
-const urlBase64ToUint8Array = (base64String) => {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/');
-
-    const rawData = atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-
-    return outputArray;
-};
-
-const saveSubscription = async (subscription) => {
-    const response = await fetch(ENDPOINT_TO_SUBSCRIBE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(subscription),
-    });
-
-    return response.json();
-};
-
 console.log('Service Worker iniciado');
 
+/**
+ * Service Worker para gerenciar notificações push e cache.
+ * Este script registra o Service Worker, lida com eventos de push e notificação,
+ * e garante que o Service Worker seja instalado e ativado corretamente.
+*/
 self.addEventListener('install', (event) => {
     console.log('Service Worker instalado');
     event.waitUntil(self.skipWaiting());
 });
 
+/**
+ * Evento de ativação do Service Worker.
+ * Garante que o Service Worker seja ativado imediatamente
+ * e que os clientes sejam atualizados para usar a nova versão.
+ * Isso é importante para garantir que as notificações push funcionem corretamente
+ * e que o Service Worker esteja sempre atualizado.
+ * @event activate
+ * @description Este evento é disparado quando o Service Worker é ativado.
+ * Ele chama `self.clients.claim()` para garantir que o Service Worker controle
+ * todos os clientes imediatamente, sem esperar que eles sejam recarregados.
+ * Isso é crucial para que as notificações push funcionem corretamente
+ * e que o Service Worker esteja sempre atualizado.
+ * @returns {Promise<void>} Retorna uma Promise que resolve quando o Service Worker é ativado.
+ * @throws {Error} Lança um erro se houver problemas ao ativar o Service Worker.
+ */
 self.addEventListener('activate', async (event) => {
     event.waitUntil(
         (async () => {
             try {
-                const subscription = await self.registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-                });
-                
-                console.log('Nova subscription criada:', subscription);
-                
-                const response = await saveSubscription(subscription);
-                console.log('Subscription salva no backend:', response);
-                
-                // Ativa o service worker imediatamente em todas as abas
                 await self.clients.claim();
                 
             } catch (error) {
@@ -60,11 +38,21 @@ self.addEventListener('activate', async (event) => {
     );
 });
 
+/**
+ * Evento de recebimento de push.
+ * Este evento é disparado quando o Service Worker recebe uma notificação push.
+ * Ele processa os dados do push e exibe uma notificação ao usuário.
+ * @event push
+ * @description Este evento é disparado quando o Service Worker recebe uma notificação push.
+ * Ele processa os dados do push e exibe uma notificação ao usuário.
+ * @returns {Promise<void>} Retorna uma Promise que resolve quando a notificação é exibida.
+ * @throws {Error} Lança um erro se houver problemas ao processar os dados do push ou exibir a notificação.
+ */
 self.addEventListener('push', function(event) {
     event.waitUntil(
         (async () => {
             try {
-                console.log('Raw push data:', event.data?.text());
+                //console.log('Raw push data:', event.data?.text());
                 
                 if (!event.data) {
                     console.warn('Recebido push sem dados');
@@ -72,7 +60,7 @@ self.addEventListener('push', function(event) {
                 }
 
                 const data = event.data.json();
-                console.log('Dados do push parseados:', data);
+                //console.log('Dados do push parseados:', data);
                 
                 const notificationData = data.notification;
                 
@@ -85,7 +73,7 @@ self.addEventListener('push', function(event) {
                     actions: notificationData.actions
                 };
 
-                console.log('Mostrando notificação com opções:', options);
+                //console.log('Mostrando notificação com opções:', options);
                 return self.registration.showNotification(notificationData.title || 'Notificação', options);
                 
             } catch (error) {
@@ -99,6 +87,16 @@ self.addEventListener('push', function(event) {
     );
 });
 
+/**
+ * Evento de clique na notificação.
+ * Este evento é disparado quando o usuário clica em uma notificação.
+ * Ele fecha a notificação e abre uma URL especificada nos dados da notificação.
+ * @event notificationclick
+ * @description Este evento é disparado quando o usuário clica em uma notificação.
+ * Ele fecha a notificação e abre uma URL especificada nos dados da notificação.
+ * @returns {Promise<void>} Retorna uma Promise que resolve quando a URL é aberta.
+ * @throws {Error} Lança um erro se houver problemas ao abrir a URL ou fechar a notificação.
+ */
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';

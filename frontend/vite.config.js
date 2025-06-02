@@ -50,9 +50,6 @@ export default defineConfig({
                     }
                 ]
             },
-            injectManifest: {
-                injectionPoint: 'self.__WB_MANIFEST'
-            }
         })
     ],
 });
