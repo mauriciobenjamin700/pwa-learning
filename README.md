@@ -33,6 +33,7 @@ Um Progressive Web App (PWA) é uma aplicação web que utiliza tecnologias mode
 
 1. Node.js instalado (versão 16 ou superior).
 2. Um projeto React com Vite e TypeScript. Se ainda não tem, siga o passo 1.
+3. Uma API `em node de preferência`
 
 ---
 
@@ -43,13 +44,13 @@ Se você já tem um projeto, pule para o **Passo 2**.
 1. Abra o terminal e execute o seguinte comando para criar um novo projeto:
 
    ```bash
-   npm create vite@latest meu-pwa --template react-ts
+   npm create vite@latest frontend --template react-ts
    ```
 
 2. Navegue até a pasta do projeto:
 
    ```bash
-   cd meu-pwa
+   cd frontend
    ```
 
 3. Instale as dependências:
@@ -80,235 +81,575 @@ O `vite-plugin-pwa` é a ferramenta que vai transformar sua aplicação em um PW
 
 ---
 
-### **Passo 3: Configurar o `vite.config.ts`**
+### **Passo 3: Configure o Vite**
 
-Agora, vamos configurar o plugin no arquivo `vite.config.ts`.
+No seu arquivo `vite.config.ts`, adicione este conteúdo, onde os metadados do `manifest` são a seu critério
 
-1. Abra o arquivo `vite.config.ts` e adicione a configuração do PWA:
+```ts
+// filepath: /home/mauriciobenjamin700/projects/my/learning/pwa-learning/react-vite/vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path';
+import { VitePWA } from 'vite-plugin-pwa';
 
-    ```typescript
-    import { defineConfig } from 'vite'
-    import react from '@vitejs/plugin-react'
-    import path from 'path';
-    import { VitePWA } from 'vite-plugin-pwa';
-
-    export default defineConfig({
-      resolve: {
-        alias: {
-          '@': path.resolve(__dirname, 'src'),
-        },
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
+  server: {
+    port: 3000,
+    host: true,
+    strictPort: true,
+    open: true,
+    allowedHosts: true,
+  },
+  preview: {
+    port: 3000,
+    host: true,
+    strictPort: true,
+  },
+  plugins: [
+    react(),
+    VitePWA({
+      strategies: 'generateSW',
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Meu App PWA',
+        description: 'Um aplicativo incrível feito com React e Vite',
+        lang: 'pt-BR',
+        short_name: 'Meu App',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#ffffff',
+        theme_color: '#053fb4',
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
       },
-      build: {
-        rollupOptions: {
-          output: {
-            manualChunks: {
-              // Separa bibliotecas grandes em chunks separados
-              react: ['react', 'react-dom'],
-              vendor: ['lodash', 'axios'],
-            },
-          },
-        },
-        chunkSizeWarningLimit: 1000, // Aumenta o limite de aviso para 1000 KB
-      },
-      plugins: [
-        react(),
-        VitePWA({
-          registerType: 'autoUpdate', // Atualiza o service worker automaticamente
-          includeAssets: ['**/*.{js,css,html,ico,png,svg}'], // Inclui todos os arquivos CSS, JS, ícones, etc.
-          manifest: {
-            name: 'NOME_DO_SEU_PWA',
-            short_name: 'APELIDO DO SEU PWA',
-            description: 'DESCRIÇÃO DO SEU PWA',
-            display: 'standalone',
-            background_color: '#ffffff',
-            theme_color: '#ffffff',
-            start_url: '/',
-            icons: [
-              {
-                src: 'pwa-192x192.png',
-                sizes: '192x192',
-                type: 'image/png',
-              },
-              {
-                src: 'pwa-512x512.png',
-                sizes: '512x512',
-                type: 'image/png',
-              },
-            ],
-          },
-          workbox: {
-            maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Aumenta o limite para 5 MB
-
-            globPatterns: ['**/*.{js,css,html,ico,png,svg}'], // Cache de arquivos CSS, JS, ícones, etc.
-            runtimeCaching: [
-              {
-                urlPattern: /\.(css|js)$/, // Cache de CSS e JS
-                handler: 'StaleWhileRevalidate', // Usa a versão em cache, mas busca atualizações
-                options: {
-                  cacheName: 'assets-cache',
-                  expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 60 * 24 * 30, // 30 dias
-                  },
-                },
-              },
-              {
-                urlPattern: /^https:\/\/api\.seusite\.com\/.*/, // Cache de APIs externas (opcional)
-                handler: 'NetworkFirst', // Prioriza a rede, mas usa o cache se offline
-                options: {
-                  cacheName: 'api-cache',
-                  expiration: {
-                    maxEntries: 10,
-                    maxAgeSeconds: 60 * 60 * 24, // 1 dia
-                  },
-                },
-              },
-            ],
-            cacheId: 1.0.0, // ID do cache
-            clientsClaim: true, // Força o service worker a assumir o controle imediatamente
-            skipWaiting: true, // Ignora a espera e ativa o novo service worker imediatamente
-          },
-          devOptions: {
-            enabled: false, // Desabilita o PWA no modo de desenvolvimento
-          },
-        }),
-      ],
-    });
-    ```
-
-2. Salve o arquivo.
-
----
-
-### **Passo 4: Adicionar Ícones e Manifest**
-
-Para que o PWA funcione corretamente, você precisa adicionar ícones e um arquivo `manifest.json`.
-
-1. Crie uma pasta chamada `public` na raiz do projeto (se ainda não existir).
-2. Adicione os ícones na pasta `public`:
-   - `pwa-192x192.png` (192x192 pixels)
-   - `pwa-512x512.png` (512x512 pixels)
-   - `apple-touch-icon.png`
-   - `favicon.ico`
-
-   Você pode gerar esses ícones usando ferramentas como [favicon.inbrowser.app](https://favicon.inbrowser.app/tools/favicon-generator).
-
----
-
-### **Passo 5: Configurar o `index.html`**
-
-Agora, vamos configurar o arquivo `index.html` para carregar o `manifest.json` e outros metadados do PWA.
-
-1. Abra o arquivo `index.html` na raiz do projeto e adicione o seguinte código dentro da tag `<head>`:
-
-   ```html
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#ffffff" />
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="description" content="Meu PWA incrível" />
-   ```
-
-   Seu `index.html` deve ficar assim:
-
-   ```html
-   <!DOCTYPE html>
-   <html lang="pt-BR">
-     <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="manifest" href="/manifest.json" />
-      <meta name="theme-color" content="#ffffff" />
-      <link rel="icon" href="/favicon.ico" />
-      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      <meta name="description" content="Meu PWA incrível" />
-      <title>Meu PWA</title>
-     </head>
-     <body>
-       <div id="root"></div>
-       <script type="module" src="/src/main.tsx"></script>
-     </body>
-   </html>
-   ```
-
----
-
-### **Passo 6: Testar o PWA**
-
-Agora que tudo está configurado, vamos testar o PWA.
-
-1. Execute o projeto em modo de pre-visualização:
-
-   ```bash
-   npm run build
-   npm run preview
-   ```
-
-2. Abra o navegador e acesse `http://localhost:5173`.
-3. Abra as ferramentas de desenvolvedor (F12) e vá para a aba **Application**.
-4. Verifique se o `manifest.json` está sendo carregado corretamente em **Manifest**.
-5. Verifique se o service worker está registrado em **Service Workers**.
-
----
-
-### **Passo 7: Adicionar um Botão de Instalação (Opcional)**
-
-Para permitir que os usuários instalem o PWA, você pode adicionar um botão de instalação. Crie um componente `InstallButton.tsx`:
-
-```tsx
-import { useEffect, useState } from 'react';
-
-function InstallButton() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-
-  useEffect(() => {
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    });
-  }, []);
-
-  const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: any) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('Usuário aceitou a instalação');
-        } else {
-          console.log('Usuário recusou a instalação');
-        }
-        setDeferredPrompt(null);
-      });
-    }
-  };
-
-  return (
-    <button onClick={handleInstallClick} disabled={!deferredPrompt}>
-      Instalar App
-    </button>
-  );
-}
-
-export default InstallButton;
+    })
+  ],
+});
 ```
 
-Adicione o componente em sua aplicação para permitir a instalação.
+### **Passo 4: Configure funções para ativar o service worker e as notificações**
 
----
+Crie uma pasta chamada `workers` no seu projeto e adicione o seguinte conteúdo nela, onde lembre-se de configurar corretamente para o seu problema as variáveis `VAPID_PUBLIC_KEY` e `API_URL`
 
-### **Passo 9: Publicar o PWA**
+```ts
+import { registerSW } from 'virtual:pwa-register';
 
-Quando estiver pronto, publique seu PWA em um servidor que suporte HTTPS (obrigatório para PWAs). Serviços como Vercel, Netlify ou GitHub Pages são ótimas opções.
+const VAPID_PUBLIC_KEY = "BAYnAICy5lO23CfhY-rhD7C_gdfIq4W9tkCbzfiaO-iIiJmNQfQfL77KuoH5vaD5VBA3SyiXIcb0g-icgB90IzQ"
+const API_URL = 'http://localhost:3001/api/subscribe';
 
----
+/**
+ * Registra o Service Worker e define o comportamento
+ * quando uma nova versão está disponível.
+ * @returns {void}
+ */
+const updateSW = registerSW({
+  onNeedRefresh() {
+    alert('Uma nova versão está disponível! Recarregando...');
+    window.location.reload();
+  },
+  onOfflineReady() {
+    console.log('App pronto para uso offline!');
+  },
+});
 
-## Novos Projetos
+export default function registerServiceWorker() {
+  updateSW();
+}
 
-- [Offline Mode](./modules/offline-mode/)
-- [Push Notifications](./modules/push-notification/)
+/**
+ * Converte uma string base64 em um array de bytes
+ * para ser usado como chave pública VAPID.
+ * @param base64String String base64 da chave pública VAPID
+ * @returns {Uint8Array} Array de bytes correspondente
+ */
+function urlBase64ToUint8Array(base64String: string) : Uint8Array {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
 
-## Referencias
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
 
-- [vite pwa](https://vite-pwa-org.netlify.app/guide/)
-- [web.dev](https://web.dev/learn/pwa/welcome?hl=pt-br)
-- [Mozilla push notification](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/js13kGames/Re-engageable_Notifications_Push)
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+/**
+ * Solicita permissão para enviar notificações ao usuário
+ * e registra o Service Worker para receber notificações push.
+ * * @description Esta função verifica se o navegador suporta notificações e Service Workers.
+ * Se suportado, solicita permissão ao usuário e, se concedida,
+ * registra o Service Worker e se inscreve para receber notificações push.
+ * Em seguida, envia a inscrição ao servidor para que possa enviar notificações push.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Notification/requestPermission
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushManager/subscribe
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/pushManager
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/ready
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/showNotification
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/pushManager/subscribe
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscription
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON/applicationServerKey
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON/endpoint
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON/options
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON/expirationTime
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON/keys
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON/p256dh
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/PushSubscriptionJSON/auth
+ * @returns {void}
+ */
+export const requestNotifyPermission = () => {
+  if ('Notification' in window && 'serviceWorker' in navigator) {
+    Notification.requestPermission().then((permission) => {
+      if (permission === 'granted') {
+        console.log('Permissão de notificações concedida.');
+
+        navigator.serviceWorker.ready.then(async (registration) => {
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+          });
+
+          fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(subscription),
+          })
+            .then((response) => {
+              if (response.ok) {
+                console.log('Inscrição salva com sucesso no servidor.');
+              } else {
+                console.error('Erro ao salvar inscrição no servidor.');
+              }
+            })
+            .catch((error) => {
+              console.error('Erro na requisição:', error);
+            });
+        });
+      } else {
+        console.warn('Permissão de notificações negada.');
+      }
+    });
+  }
+}
+```
+
+e no seu arquivo ``main.tsx`, lembre-se de adicionar o import e chamada da função **registerSW**
+
+```ts
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+import { Provider } from 'react-redux';
+import { store } from './store';
+import registerSW from "@/workers";
+
+registerSW();
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>,
+)
+
+```
+
+Para finalizar, vamos configurar nosso arquivo `sw.js` dentro da nossa pasta ``public`, onde teremos este conteúdo:
+
+```js
+console.log('Service Worker iniciado');
+
+/**
+ * Service Worker para gerenciar notificações push e cache.
+ * Este script registra o Service Worker, lida com eventos de push e notificação,
+ * e garante que o Service Worker seja instalado e ativado corretamente.
+*/
+self.addEventListener('install', (event) => {
+    console.log('Service Worker instalado');
+    event.waitUntil(self.skipWaiting());
+});
+
+/**
+ * Evento de ativação do Service Worker.
+ * Garante que o Service Worker seja ativado imediatamente
+ * e que os clientes sejam atualizados para usar a nova versão.
+ * Isso é importante para garantir que as notificações push funcionem corretamente
+ * e que o Service Worker esteja sempre atualizado.
+ * @event activate
+ * @description Este evento é disparado quando o Service Worker é ativado.
+ * Ele chama `self.clients.claim()` para garantir que o Service Worker controle
+ * todos os clientes imediatamente, sem esperar que eles sejam recarregados.
+ * Isso é crucial para que as notificações push funcionem corretamente
+ * e que o Service Worker esteja sempre atualizado.
+ * @returns {Promise<void>} Retorna uma Promise que resolve quando o Service Worker é ativado.
+ * @throws {Error} Lança um erro se houver problemas ao ativar o Service Worker.
+ */
+self.addEventListener('activate', async (event) => {
+    event.waitUntil(
+        (async () => {
+            try {
+                await self.clients.claim();
+                
+            } catch (error) {
+                console.error('Erro ao ativar service worker:', error);
+            }
+        })()
+    );
+});
+
+/**
+ * Evento de recebimento de push.
+ * Este evento é disparado quando o Service Worker recebe uma notificação push.
+ * Ele processa os dados do push e exibe uma notificação ao usuário.
+ * @event push
+ * @description Este evento é disparado quando o Service Worker recebe uma notificação push.
+ * Ele processa os dados do push e exibe uma notificação ao usuário.
+ * @returns {Promise<void>} Retorna uma Promise que resolve quando a notificação é exibida.
+ * @throws {Error} Lança um erro se houver problemas ao processar os dados do push ou exibir a notificação.
+ */
+self.addEventListener('push', function(event) {
+    event.waitUntil(
+        (async () => {
+            try {
+                //console.log('Raw push data:', event.data?.text());
+                
+                if (!event.data) {
+                    console.warn('Recebido push sem dados');
+                    return;
+                }
+
+                const data = event.data.json();
+                //console.log('Dados do push parseados:', data);
+                
+                const notificationData = data.notification;
+                
+                const options = {
+                    body: notificationData.body,
+                    icon: notificationData.icon,
+                    badge: notificationData.badge,
+                    vibrate: notificationData.vibrate,
+                    data: notificationData.data,
+                    actions: notificationData.actions
+                };
+
+                //console.log('Mostrando notificação com opções:', options);
+                return self.registration.showNotification(notificationData.title || 'Notificação', options);
+                
+            } catch (error) {
+                console.error('Erro ao processar push:', error);
+                // Mostra uma notificação de fallback em caso de erro
+                return self.registration.showNotification('Notificação', {
+                    body: 'Recebemos uma atualização mas houve um erro ao processá-la.'
+                });
+            }
+        })()
+    );
+});
+
+/**
+ * Evento de clique na notificação.
+ * Este evento é disparado quando o usuário clica em uma notificação.
+ * Ele fecha a notificação e abre uma URL especificada nos dados da notificação.
+ * @event notificationclick
+ * @description Este evento é disparado quando o usuário clica em uma notificação.
+ * Ele fecha a notificação e abre uma URL especificada nos dados da notificação.
+ * @returns {Promise<void>} Retorna uma Promise que resolve quando a URL é aberta.
+ * @throws {Error} Lança um erro se houver problemas ao abrir a URL ou fechar a notificação.
+ */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(
+    clients.openWindow(url)
+  );
+});
+```
+
+### **Passo 5: Build do Frontend**
+
+Usaremos um script do makefile para testar nosso pwa.
+
+```bash
+start:
+  @npm run build
+  @cp public/sw.js dist/sw.js
+  @npm run preview
+```
+
+Use o comando ``make start` para iniciar o Frontend
+
+## **Guia Passo a Passo:  Configurando o Backend para enviar as notificações
+
+Crie uma pasta para o backend e instale as dependências:
+
+```bash
+mkdir backend
+cd backend
+npm init -y
+npm install express cors web-push body-parser dotenv sqlite3
+```
+
+Configure as chaves VAPID:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+Crie um arquivo `.env`:
+
+```env
+VAPID_PUBLIC_KEY="sua_chave_publica"
+VAPID_PRIVATE_KEY="sua_chave_privada"
+VAPID_EMAIL="seu@email.com"
+```
+
+Crie o banco de dados SQLite (`db.js`):
+
+```javascript
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('subscriptions.db');
+
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    endpoint TEXT UNIQUE,
+    keys TEXT
+  )`);
+});
+
+module.exports = db;
+```
+
+Configure o servidor Express (`index.js`):
+
+```javascript
+require('dotenv').config();
+const express = require('express');
+const webpush = require('web-push');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const db = require('./db');
+
+const app = express();
+app.use(cors({ origin: '*' }));
+app.use(bodyParser.json());
+
+webpush.setVapidDetails(
+  'mailto:' + process.env.VAPID_EMAIL,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
+// Endpoint para subscrição
+app.post('/api/subscribe', (req, res) => {
+  const { endpoint, keys } = req.body;
+  db.run(
+    `INSERT INTO subscriptions (endpoint, keys) VALUES (?, ?)`,
+    [endpoint, JSON.stringify(keys)],
+    (err) => {
+      if (err) {
+        res.status(500).json({ error: 'Erro ao salvar inscrição' });
+      } else {
+        res.status(201).json({ message: 'Inscrito com sucesso!' });
+      }
+    }
+  );
+});
+
+// Endpoint para enviar notificações
+app.post('/api/notify', async (req, res) => {
+  const payload = JSON.stringify({
+    notification: {
+      title: req.body.title || 'Notificação',
+      body: req.body.message || 'Nova mensagem!',
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
+      vibrate: [100, 50, 100],
+      actions: [
+        {
+          action: 'explore',
+          title: 'Ver mais'
+        }
+      ]
+    }
+  });
+
+  try {
+    const subscriptions = await db.all('SELECT endpoint, keys FROM subscriptions');
+    const results = [];
+
+    for (const sub of subscriptions) {
+      try {
+        await webpush.sendNotification({
+          endpoint: sub.endpoint,
+          keys: JSON.parse(sub.keys)
+        }, payload);
+      } catch (error) {
+        if (error.statusCode === 410) {
+          await db.run('DELETE FROM subscriptions WHERE endpoint = ?', [sub.endpoint]);
+        }
+      }
+    }
+    res.json({ message: 'Notificações enviadas' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao enviar notificações' });
+  }
+});
+
+app.listen(3001, () => console.log('Backend rodando na porta 3001'));
+```
+
+Agora o backend oferece rotas para cadastrar o usuário para as notificações e o envio das notificações
+
+## Opções de Notificação Push
+
+Aqui está um exemplo completo de payload para notificações push com todas as opções disponíveis:
+
+```javascript
+const payload = JSON.stringify({
+  notification: {
+    // Propriedades Básicas
+    title: "Título da Notificação",     // Título em negrito
+    body: "Texto da notificação",       // Corpo da mensagem
+    
+    // Recursos Visuais
+    icon: "/path/to/icon.png",         // Ícone principal (92x92px recomendado)
+    badge: "/path/to/badge.png",       // Badge para Android (24x24px)
+    image: "/path/to/large-image.jpg", // Imagem grande (Chrome)
+    
+    // Comportamento
+    vibrate: [100, 50, 100],          // Padrão de vibração [vibrar, pausa, vibrar]
+    sound: "/path/to/sound.mp3",      // Som personalizado
+    tag: "message-group-1",           // ID para agrupar notificações similares
+    priority: 1,                      // Prioridade (-2 a 2, 0 é default)
+    timestamp: Date.now(),            // Momento da criação
+    
+    // Ações Interativas
+    actions: [
+      {
+        action: "reply",              // ID único da ação
+        title: "Responder",           // Texto do botão
+        icon: "/icons/reply.png",     // Ícone do botão (opcional)
+        type: "text",                 // Tipo de interação
+        placeholder: "Digite aqui"     // Placeholder para input
+      },
+      {
+        action: "close",
+        title: "Fechar"
+      }
+    ],
+    
+    // Dados Personalizados
+    data: {
+      url: "https://meusite.com/destino",
+      id: "123",
+      customData: "qualquer dado"
+    },
+    
+    // Configurações de Texto
+    dir: "auto",                      // Direção do texto (ltr, rtl, auto)
+    lang: "pt-BR",                    // Idioma
+    
+    // Configurações Avançadas
+    requireInteraction: true,         // Mantém até o usuário interagir
+    renotify: false,                  // Reordena notificações do mesmo tipo
+    silent: false                     // Notificação silenciosa
+  }
+});
+```
+
+### Detalhamento das Opções
+
+#### Propriedades Básicas
+
+- `title`: Título principal da notificação
+- `body`: Texto do corpo da notificação
+
+#### Recursos Visuais
+
+- `icon`: Ícone principal (92x92px recomendado)
+- `badge`: Ícone menor para Android (24x24px)
+- `image`: Imagem grande (suporte apenas Chrome)
+
+#### Comportamento
+
+- `vibrate`: Array com padrão de vibração em millisegundos
+- `sound`: Caminho para arquivo de som
+- `tag`: Identificador para agrupar notificações
+- `priority`: Nível de prioridade (-2 a 2)
+- `timestamp`: Momento de criação da notificação
+
+#### Ações Interativas
+
+```javascript
+actions: [{
+  action: "ID_ÚNICO",      // Identificador da ação
+  title: "Texto Botão",    // Texto exibido
+  icon: "caminho/icone",   // Ícone opcional
+  type: "text",            // Tipo de interação
+  placeholder: "Digite..." // Para inputs de texto
+}]
+```
+
+#### Dados Personalizados
+
+```javascript
+data: {
+  // Qualquer dado que queira passar
+  url: "https://...",
+  id: "123",
+  customData: "valor"
+}
+```
+
+#### Configurações de Texto
+
+- `dir`: Direção do texto
+  - `ltr`: Esquerda para direita
+  - `rtl`: Direita para esquerda
+  - `auto`: Automático
+- `lang`: Código do idioma (ex: "pt-BR")
+
+#### Configurações Avançadas
+
+- `requireInteraction`: Se true, a notificação permanece até interação
+- `renotify`: Se true, notifica mesmo com tag existente
+- `silent`: Se true, não emite som ou vibração
+
+### Compatibilidade
+
+Nem todas as opções são suportadas em todos os navegadores/dispositivos:
+
+- Android: Suporta a maioria das opções
+- iOS: Suporte limitado a notificações básicas
+- Desktop: Suporte variável dependendo do navegador
+
+### Boas Práticas
+
+1. Sempre forneça `title` e `body`
+2. Use `icon` para melhor identificação visual
+3. Mantenha `actions` simples e diretas
+4. Use `tag` para evitar spam de notificações
+5. Configure `requireInteraction` com moderação
