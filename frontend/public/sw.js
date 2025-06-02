@@ -86,7 +86,7 @@ self.addEventListener('push', function(event) {
                 };
 
                 console.log('Mostrando notificação com opções:', options);
-                return self.registration.showNotification(data.title || 'Notificação', options);
+                return self.registration.showNotification(notificationData.title || 'Notificação', options);
                 
             } catch (error) {
                 console.error('Erro ao processar push:', error);

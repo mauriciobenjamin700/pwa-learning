@@ -76,6 +76,82 @@ app.post('/api/subscribe', (req, res) => {
 });
 
 app.post('/api/notify', async (req, res) => {
+
+  /**
+   * A baixo seguem um exemplo de payload de notificação que você pode usar:
+   * const payload = JSON.stringify({
+    notification: {
+    // Título da notificação (aparece em negrito)
+    title: "Título da Notificação",
+    
+    // Corpo principal da mensagem
+    body: "Texto principal da notificação",
+    
+    // URL do ícone principal (92x92px recomendado)
+    icon: "/path/to/icon.png",
+    
+    // URL do badge (24x24px, aparece em sistemas Android)
+    badge: "/path/to/badge.png",
+    
+    // Padrão de vibração em millisegundos [vibrar, pausa, vibrar, ...]
+    vibrate: [100, 50, 100],
+    
+    // Cor do tema da notificação
+    tag: "message-group-1", // Agrupa notificações similares
+    
+    // Som personalizado para a notificação
+    sound: "/path/to/sound.mp3",
+    
+    // Define prioridade (0 default, -2 min até 2 max)
+    priority: 1,
+    
+    // Timestamp de quando a notificação foi criada
+    timestamp: Date.now(),
+    actions: [
+  {
+    action: "reply",    // Identificador único da ação
+    title: "Responder", // Texto do botão
+    icon: "/icons/reply.png", // Ícone do botão (opcional)
+    type: "text",       // Tipo de interação
+    placeholder: "Digite sua resposta" // Para inputs de texto
+  },
+  {
+    action: "close",
+    title: "Fechar"
+  }
+  ],
+  data: {
+  // Dados arbitrários para uso no click handler
+  url: "https://meusite.com/destino",
+  id: "123",
+  customData: "qualquer dado"
+}
+  },
+  {
+  // Direção do texto
+  dir: "auto", // ltr, rtl, auto
+
+  // Idioma da notificação
+  lang: "pt-BR",
+
+  // Tempo em ms que a notificação ficará visível
+  requireInteraction: true, // Mantém até o usuário interagir
+
+  // Ordenação quando houver múltiplas notificações
+  timestamp: Date.now(),
+
+  // Reordena notificações do mesmo tipo
+  renotify: false,
+
+  // Remove silenciosamente notificações antigas do mesmo tipo
+  silent: false,
+
+  // Imagem grande (somente Chrome)
+  image: "/path/to/large-image.jpg",
+}
+});
+   */
+
   const payload = JSON.stringify({
     notification: {
       title:'Notificação DESGRAÇA',
