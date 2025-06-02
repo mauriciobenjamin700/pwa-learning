@@ -1,7 +1,5 @@
-// This line is required for workbox manifest injection
-self.__WB_MANIFEST;
-
 const VAPID_PUBLIC_KEY = "BAYnAICy5lO23CfhY-rhD7C_gdfIq4W9tkCbzfiaO-iIiJmNQfQfL77KuoH5vaD5VBA3SyiXIcb0g-icgB90IzQ"
+const ENDPOINT_TO_SUBSCRIBE = 'http://localhost:3001/api/subscribe';
 
 console.log('Chave VAPID Pública:', VAPID_PUBLIC_KEY);
 
@@ -22,7 +20,7 @@ const urlBase64ToUint8Array = (base64String) => {
 };
 
 const saveSubscription = async (subscription) => {
-    const response = await fetch('http://localhost:3001/api/subscribe', {
+    const response = await fetch(ENDPOINT_TO_SUBSCRIBE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(subscription),
@@ -75,20 +73,16 @@ self.addEventListener('push', function(event) {
 
                 const data = event.data.json();
                 console.log('Dados do push parseados:', data);
-
+                
+                const notificationData = data.notification;
+                
                 const options = {
-                    body: data.body || 'Sem mensagem',
-                    icon: data.icon || '/icon-192x192.png',
-                    badge: data.badge || '/icon-192x192.png',
-                    vibrate: data.vibrate || [100, 50, 100],
-                    data: {
-                        ...data.data,
-                        timestamp: Date.now()
-                    },
-                    actions: data.actions || [{
-                        action: 'close',
-                        title: 'Fechar'
-                    }]
+                    body: notificationData.body,
+                    icon: notificationData.icon,
+                    badge: notificationData.badge,
+                    vibrate: notificationData.vibrate,
+                    data: notificationData.data,
+                    actions: notificationData.actions
                 };
 
                 console.log('Mostrando notificação com opções:', options);

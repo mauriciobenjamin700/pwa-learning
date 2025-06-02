@@ -23,7 +23,7 @@ webpush.setVapidDetails(
 console.log('Chave VAPID Pública:', process.env.VAPID_PUBLIC_KEY);
 
 app.get("/", (req, res) => {
-  res.send('Servidor de Notificações Push');
+  res.status(200).json({ message: "Servidor backend rodando!" });
 });
 
 app.get('/api/subscriptions', (req, res) => {
