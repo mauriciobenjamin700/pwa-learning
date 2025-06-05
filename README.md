@@ -141,6 +141,13 @@ export default defineConfig({
   ],
 });
 ```
+Crie um arquivo chamado **vite-env.d.ts** na raiz do seu projeto (ou em src):
+
+```ts
+declare module 'virtual:pwa-register' {
+  export function registerSW(options?: any): any;
+}
+```
 
 ### **Passo 4: Configure funções para ativar o service worker e as notificações**
 
