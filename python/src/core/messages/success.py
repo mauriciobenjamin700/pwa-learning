@@ -1,0 +1,5 @@
+SUCCESS_SUBSCRIBED: str = "Inscrito com sucesso"
+SUCCESS_UNSUBSCRIBED: str = "Inscrição removida"
+SUCCESS_NOTIFICATION_SENT: str = "Notificação enviada"
+SUCCESS_BROADCAST_SENT: str = "Broadcast enviado"
+SUCCESS_EVENT_EMITTED: str = "Evento emitido"

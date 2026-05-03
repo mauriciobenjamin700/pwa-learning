@@ -1,0 +1,6 @@
+ERROR_REQUIRED_ENDPOINT_KEYS: str = "endpoint e keys são obrigatórios"
+ERROR_REQUIRED_TITLE_BODY: str = "title e body são obrigatórios"
+ERROR_SUBSCRIPTION_NOT_FOUND: str = "Inscrição não encontrada"
+ERROR_USER_NOT_AUTHENTICATED: str = "Usuário não autenticado"
+ERROR_INVALID_API_KEY: str = "API key inválida ou ausente"
+ERROR_REQUIRED_TYPE: str = "Campo 'type' é obrigatório"
